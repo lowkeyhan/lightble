@@ -1,0 +1,2 @@
+# lightble
+用apicloud的ble模块开发连接蓝牙接收广播数据，并16进制转化为浮点数
