@@ -1,0 +1,290 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>底部导航</title>
+    <link rel="stylesheet" type="text/css" href="./css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="./css/style.css"/>
+    <style>
+        header{ background-color: #f2f2f2; }
+        header ul li { height: 50px; line-height: 50px; text-align: center; display: none; color: #323237; position: relative;font-size: 18px;  }
+        header ul li.active{ display: block; }
+        #footer{  background-color: #f2f2f2; }
+        #footer ul li{  padding-top: 36px; padding-bottom: 4px; background: url() no-repeat center 2px; background-size: auto 30px; text-align: center; }
+        #footer ul li.active{ color: #6ab494; }
+        #footer ul li:nth-child(1){ background-image: url(./image/bottombtn0101.png); }
+        #footer ul li:nth-child(2){ background-image: url(./image/bottombtn0201.png); }
+        #footer ul li:nth-child(3){ background-image: url(./image/bottombtn0301.png); }
+        #footer ul li:nth-child(4){ background-image: url(./image/bottombtn0401.png); }
+        #footer ul li:nth-child(1).active{ background-image: url(./image/bottombtn0102.png); }
+        #footer ul li:nth-child(2).active{ background-image: url(./image/bottombtn0202.png); }
+        #footer ul li:nth-child(3).active{ background-image: url(./image/bottombtn0302.png); }
+        #footer ul li:nth-child(4).active{ background-image: url(./image/bottombtn0402.png); }
+    	.divbutton{
+    		border: 1px solid #dddddd;
+    		height:60px;
+    	 }
+    </style>
+</head>
+<body>
+<div id="wrap" class="flex-wrap flex-vertical">
+    <header>
+        <ul>
+            <li class="border-b active" >刷新</li>
+            <li class="border-b" >端API</li>
+            <li class="border-b" >开发</li>
+            <li class="border-b" >文档</li>
+        </ul>
+    </header>
+    <div id="main" class="flex-con" style="height: 300px;width: 100%;overflow: scroll;">
+		
+    </div>
+    <div id="data" style="height: 100px;width: 100%;overflow:scroll;"></div>
+    <div id="data1" style="height: 100px;width: 100%;overflow:scroll;"></div>
+     <div id="data2" style="height: 100px;width: 100%;overflow:scroll;"></div>
+    <div id="footer" class="border-t">
+        <ul class="flex-wrap" >
+            <li tapmode="hover" onclick="addblue(  );" class="flex-con active" >blue</li>
+            <li tapmode="hover" onclick="getdata();" class="flex-con" >端API</li>
+            <li tapmode="hover" onclick="getcons();" class="flex-con" >开发</li>
+            <li tapmode="hover" onclick="randomSwitchBtn( this );" class="flex-con" >文档</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
+<script type="text/javascript" src="script/api.js"></script>
+<script type="text/javascript">
+var ble;
+    apiready = function () {
+        $api.fixStatusBar( $api.dom('header') );
+        api.setStatusBarStyle({
+            style: 'dark',
+            color: '#6ab494'
+        });
+        //funIniGroup();
+        ble= api.require('ble');
+        ble.initManager(function(ret) {
+	    	if (ret.state == "poweredOn") {
+	        	api.alert({ msg: "初始化成功" });
+	        	
+	    	}
+		});
+		//alert('xiayibu');
+		ble.scan({
+					    serviceUUIDs: []
+					}, function(ret,err) {
+					    if (ret.status) {
+					        alert('开始扫描');
+					        
+					        
+					        
+					    }else{
+					    	alert(err);
+					    }
+					    alert(err);
+					});
+	//
+					
+					
+    }
+function addblue(){
+    	ble.getPeripheral(function(ret) {
+		    if (ret) {
+		     var btnhtml='';
+		    for(var o in ret.peripherals){
+		    	btnhtml+='<div class="divbutton" onclick="connect(\''+ret.peripherals[o].uuid+'\')" >name:'+ret.peripherals[o].name+'<br>uuid:'+ret.peripherals[o].uuid+'</div>'
+		    }
+		      // api.alert({ msg: ret.peripherals });
+		      //api.alert({ msg: btnhtml });
+		    //  api.alert({ msg: $api.dom('#main') });
+		    $api.html($api.dom('#main'),btnhtml)
+		       //api.alert({ msg: btnhtml });
+		       /*
+		        
+ble.discoverCharacteristics({
+    peripheralUUID: '88:0F:10:76:71:49',
+    serviceUUID:'0000fee0-0000-1000-8000-00805f9b34fb'
+}, function(ret) {
+    if (ret) {
+        api.alert({ msg: JSON.stringify(ret)+'345' });
+    }
+});
+    } else {
+        alert(err.code+'123');
+    }
+});
+		    */
+		    }
+		});
+		
+    }
+    var persssuuid="";
+    function connect(uuid){
+    persssuuid=uuid;
+    	ble.connect({
+				    peripheralUUID: uuid
+					},
+					 function(ret, err) {
+					    if (ret.status) {
+					        alert("连接成功！");
+					        getservice(uuid);
+					        }
+					     }
+					);
+     
+    }
+    function getservice(uuid){
+    ble.discoverService({
+		    peripheralUUID: uuid
+		}, function(ret) {
+		    if (ret) {
+		         var btnhtml='';
+		    for(var o in ret.services){
+		    	btnhtml+='<div class="divbutton" onclick="serviceconnect(\''+uuid+'\',\''+ret.services[o]+'\')" >uuid:'+ret.services[o]+'</div>'
+		    }
+		    $api.html($api.dom('#main'),btnhtml)
+		    }
+		});
+    }
+    function serviceconnect(peruuid,suuid)
+    {
+    	ble.discoverCharacteristics({
+    					serviceUUID:suuid,
+					    peripheralUUID: peruuid
+					}, function(ret) {
+					    if (ret) {
+					    var btnhtml='';
+					    for(var o in ret.characteristics){
+					    	btnhtml+='<div class="divbutton" onclick="tzconnect(\''+suuid+'\',\''+peruuid+'\',\''+ret.characteristics[o].uuid+'\')" >uuid:'+ret.characteristics[o].uuid+'</div>'
+					    }
+					    $api.html($api.dom('#main'),btnhtml)
+					       // api.alert({ msg: JSON.stringify(ret) });
+					    }
+					});
+    }
+    function tzconnect(suuid,peruuid,charuuid){
+			   /* ble.setSimpleNotify({
+			    peripheralUUID: peruuid,
+			    serviceUUID: suuid,
+			    characteristicUUID: charuuid
+			}, function(ret, err) {
+			    api.alert({ msg: JSON.stringify(ret)});
+			    api.alert({ msg: JSON.stringify(err)});
+			    if (!ret.status) {
+			        api.alert({ msg: JSON.stringify(err) });
+			    }
+			});
+     		api.alert({ msg: suuid+peruuid+charuuid });*/
+		    ble.setNotify({
+		    peripheralUUID: peruuid,
+		    serviceUUID: suuid,
+		    characteristicUUID: charuuid
+			}, function(ret,err) {
+				 //api.alert({ msg: JSON.stringify(ret)+1});
+			    //api.alert({ msg: JSON.stringify(err)+2});
+			    if (ret) {
+			    //api.alert({ msg: "开始监听" });
+			        //api.alert({ msg: JSON.stringify(ret)+3 });
+			        var values=ret.characteristic.value
+			        //按字节顺序高地位翻转
+			        var wendu=values[6]+""+values[7]+values[4]+""+values[5]+values[2]+""+values[3]+values[0]+""+values[1]
+			       
+			        $api.append($api.dom('#data'), ret.characteristic.value+"&nbsp;"+"&nbsp;");
+			        $api.append($api.dom('#data1'),hex16tofloat(wendu)+"&nbsp;"+"&nbsp;");
+			        
+			        
+			    }else{
+			    	api.alert({ msg: err+4 });
+			    }
+			});
+    }
+    //16进制转浮点数
+    function hex16tofloat(hexstr){
+    	//根据单个16进制组成长字符串
+    	var longstr="";
+    	for(var index=0;index<hexstr.length; index++){
+    		 var dstr=parseInt(hexstr[index],16).toString(2);
+    		 var hex16to2="";
+    		 for(var bitnum=0;bitnum<(4-dstr.length);bitnum++){
+    		 	hex16to2+="0";
+    		 }
+    		 longstr+=hex16to2+""+dstr;
+    	}
+    	//指数位
+    	 var exponential=longstr.substring(1,9);
+    	  exponential=parseInt(exponential,2)-127;
+    	  //数据位
+    	 var data='1'+longstr.substring(9,longstr.length);
+    	 //扩大的倍数，幂次方
+    	 var multipleNum=Math.pow(2,data.length-1-exponential);
+    	 var temperature=parseInt(data,2)/multipleNum;
+    	return temperature.toFixed(6);
+    }
+   
+    function getcons(){
+    ble.isConnected({
+		    peripheralUUID: persssuuid
+		}, function(ret) {
+		    if (ret) {
+		        alert('已连接');
+		    }
+		});
+    }
+    function getdata(){
+    	ble.getAllSimpleNotifyData(function(ret) {
+		    api.alert({ msg: JSON.stringify(ret) });
+		});
+    }
+    function funIniGroup(){
+        var eHeaderLis = $api.domAll('header li'),
+            frames = [];
+        for (var i = 0,len = eHeaderLis.length; i < len; i++) {
+                frames.push( { 
+                    name: 'frame'+i, 
+                    url: './html/frame'+i+'.html', 
+                    bgColor : 'rgba(0,0,0,.2)',
+                    bounces:true
+                } )
+        }
+        api.openFrameGroup({
+            name: 'group',
+            scrollEnabled: false,
+            rect: {
+                x: 0, 
+                y: $api.dom('header').offsetHeight, 
+                w: api.winWidth, 
+                h: $api.dom('#main').offsetHeight
+            },
+            index: 0,
+            frames: frames
+        }, function (ret, err) {
+
+        });
+    }
+
+    // 随意切换按钮
+    function randomSwitchBtn( tag ) {
+        if( tag == $api.dom('#footer li.active') )return;
+        var eFootLis = $api.domAll('#footer li'),
+            eHeaderLis = $api.domAll('header li'),
+            index = 0;
+        for (var i = 0,len = eFootLis.length; i < len; i++) {
+            if( tag == eFootLis[i] ){
+                index = i;
+            }else{
+                $api.removeCls(eFootLis[i], 'active');
+                $api.removeCls(eHeaderLis[i], 'active');
+            }
+        }
+        $api.addCls( eFootLis[index], 'active');
+        $api.addCls( eHeaderLis[index], 'active');
+        api.setFrameGroupIndex({
+            name: 'group',
+            index: index
+        });
+    }
+    
+</script>
